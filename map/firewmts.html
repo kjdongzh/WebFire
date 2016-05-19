@@ -1,0 +1,138 @@
+<html>
+<head>
+  <title>Fire wmts</title>
+  <meta http-equiv="Access-Control-Allow-Origin" content="*">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <style> 
+	body {
+		margin:0px;
+		padding:0px;
+		border:0px;
+	}
+	#container {
+		margin:0px;
+		padding:0px;
+		width:100%;
+		height:100%;
+		position:absolute;
+	}
+	#map {
+		width:100%;
+		height:100%;
+		background:#d5e6f5;
+		position:absolute;
+		float:left;
+	}
+	</style>
+  <!--<script src="OpenLayers.js"></script>-->
+  <script src="http://openlayers.org/api/2.11/OpenLayers.js"></script>
+  <script type="text/javascript">
+        var lon = 127;
+        var lat = 44.5;
+        var zoom = 10;
+        var map, layer, marker_layer;
+        var vector;
+        var marker = null;
+        var markerable = true;
+        function init(){		
+		    format = 'image/png';
+			var bounds = new OpenLayers.Bounds(
+				126.6, 44,
+				128, 45
+			);
+			var options = {
+				 restrictedExtent: bounds
+			};
+		
+            map = new OpenLayers.Map( 'map' ,options);
+            layer = new OpenLayers.Layer.WMS( "OpenLayers WMS",
+                    "http://202.114.118.73:8787/geoserver/fire/wms", {layers: 'fire:data'} );
+            marker_layer = new OpenLayers.Layer.Markers("markers");
+     		
+            vector = new OpenLayers.Layer.Vector("firelayer");
+            //定制要素样式
+            var style = new OpenLayers.Style();
+			var sketchSymbolizers = {
+                "Point": {
+                    pointRadius: 2,
+                    //graphicName: "square",
+                    fillColor: "#FF0000",
+                    fillOpacity: 0.6,
+                    strokeWidth: 5,
+                    strokeOpacity: 0.4,
+                    strokeColor: "#FF6666"
+                },
+                "Line": {
+                    strokeWidth: 3,
+                    strokeOpacity: 1,
+                    strokeColor: "#FF6666",
+                    strokeDashstyle: "solid"
+                },
+                "Polygon": {
+                    strokeWidth: 2,
+                    strokeOpacity: 1,
+                    strokeColor: "#FF6666",
+                    fillColor: "white",
+                    fillOpacity: 0
+                }
+            };
+			var rule=new OpenLayers.Rule({
+				 filter:new OpenLayers.Filter({}),
+				 symbolizer:sketchSymbolizers
+			 });
+			style.addRules([rule]);
+			vector.styleMap = new OpenLayers.StyleMap(style);
+			//定制要素样式
+			
+            
+            map.addLayers([layer,marker_layer,vector]);
+            map.setCenter(new OpenLayers.LonLat(lon, lat), zoom);
+            map.addControl( new OpenLayers.Control.LayerSwitcher() );
+            map.events.register("click", map, onMapClick);
+        }
+      //鼠标单击事件
+		function onMapClick(e){
+			var lonlat = map.getLonLatFromViewPortPx(e.xy);
+			if(markerable){
+				marker_layer.removeMarker(marker);
+				var pos =  new OpenLayers.LonLat (lonlat.lon, lonlat.lat);
+				//创建Marker对象
+				marker = new OpenLayers.Marker ( pos );
+				marker.setOpacity(225);
+				//添加marker到marker layer
+				marker_layer.addMarker(marker);
+				
+				window.status="lat="+lonlat.lat+",lon="+lonlat.lon;
+				
+			}
+		}
+	      function setNoMarker(){
+	    	  markerable = false;
+	      }
+	      function removeMark(){
+	    	  marker_layer.removeMarker(marker);
+	      }
+	      function drawLine(line){
+
+	    	  var fireline = new OpenLayers.Feature.Vector(  
+	  				OpenLayers.Geometry.fromWKT(line));  
+	  		  vector.addFeatures([fireline]);
+	      }
+	      function drawPoint(pointset){
+	    	  var points = new OpenLayers.Feature.Vector(  
+	  				OpenLayers.Geometry.fromWKT(pointset));  
+	  		  vector.addFeatures([points]);
+	      }
+	      function clearVector(){
+	    	  vector.removeAllFeatures();
+	    	  markerable = true;
+	      }
+    </script>
+</head>
+<body onload="init()">
+  <div id="container">
+      <div id="map"></div>
+  </div>
+
+</body>
+</html>

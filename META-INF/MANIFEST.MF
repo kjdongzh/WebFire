@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: RCPtext
+Bundle-SymbolicName: RCPtext;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: rcptext.Activator
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ActivationPolicy: lazy
+Bundle-ClassPath: .,
+ lib/slf4j-api-1.6.3.jar,
+ lib/trove4j-2.0.2.jar,
+ lib/jsi-1.0.0.jar,
+ lib/javacsv.jar,
+ lib/dom4j-1.6.1.jar

@@ -1,0 +1,81 @@
+<html>
+<head>
+  <title>Fire wmts</title>
+  <meta http-equiv="Access-Control-Allow-Origin" content="*">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <style> 
+	body {
+		margin:0px;
+		padding:0px;
+		border:0px;
+	}
+	#container {
+		margin:0px;
+		padding:0px;
+		width:100%;
+		height:100%;
+		position:absolute;
+	}
+	#map {
+		width:100%;
+		height:100%;
+		background:#d5e6f5;
+		position:absolute;
+		float:left;
+	}
+	</style>
+  <script src="OpenLayers.js"></script>
+  <script type="text/javascript">
+        var lon = 127;
+        var lat = 44.5;
+        var zoom = 10;
+        var map, layer, marker_layer, vector;
+		var marker = null;
+        function init(){		
+		    format = 'image/png';
+			var bounds = new OpenLayers.Bounds(
+				126.6, 44,
+				128, 45
+			);
+			var options = {
+                restrictedExtent: bounds
+            }
+
+		
+            map = new OpenLayers.Map( 'map', options);
+            layer = new OpenLayers.Layer.WMS( "OpenLayers WMS",
+                    "http://localhost:8787/geoserver/fire/wms", {layers: 'data'} );
+			marker_layer = new OpenLayers.Layer.Markers("markers");		
+            
+			vector = new OpenLayers.Layer.Vector("firelayer",{
+                styleMap: new OpenLayers.StyleMap({
+                    fillColor: "#000000",
+					strokeColor: "#ff4500",
+					strokeWidth: 2
+                }),
+            });
+			
+            map.addLayers([layer, marker_layer, vector]);
+            map.setCenter(new OpenLayers.LonLat(lon, lat), zoom);
+            map.addControl( new OpenLayers.Control.LayerSwitcher() );
+			//map.addControl(new OpenLayers.Control.MousePosition());
+			map.events.register("click", map, onMapClick);
+        }
+		//鼠标单击事件
+		function onMapClick(e){
+			var lonlat = map.getLonLatFromViewPortPx(e.xy);
+
+			var wkt = "POINT("+lonlat.lon+" "+lonlat.lat+")";
+			var polygon = new OpenLayers.Feature.Vector(  
+				OpenLayers.Geometry.fromWKT(wkt));  
+			vector.addFeatures([polygon]);
+		}
+    </script>
+</head>
+<body onload="init()">
+  <div id="container">
+      <div id="map"></div>
+  </div>
+
+</body>
+</html>
